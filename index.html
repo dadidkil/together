@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Together Minecraft Server — 1.21.10</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=VT323&display=swap" rel="stylesheet">
+    
+    <!-- Icons (Lucide) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🟩</text></svg>">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        mc: {
+                            green: '#54a329',
+                            green_dark: '#386e1c',
+                            dirt: '#8f6341',
+                            stone: '#7d7d7d',
+                            obsidian: '#1a1826',
+                            redstone: '#b81d1d',
+                            diamond: '#4eedd8',
+                            text: '#f0f0f0'
+                        }
+                    },
+                    fontFamily: {
+                        pixel: ['"VT323"', 'monospace'],
+                        sans: ['"Inter"', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'float-delayed': 'float 7s ease-in-out 2s infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #121212;
+            color: #f0f0f0;
+            overflow-x: hidden;
+            cursor: default; 
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #0f0f0f; }
+        ::-webkit-scrollbar-thumb { background: #54a329; border: 2px solid #0f0f0f; }
+        ::-webkit-scrollbar-thumb:hover { background: #386e1c; }
+
+        /* Text Shadows */
+        .text-shadow { text-shadow: 2px 2px 0px #000; }
+        .text-shadow-glow { text-shadow: 0 0 10px rgba(84, 163, 41, 0.5), 2px 2px 0px #000; }
+
+        /* Button Styles */
+        .btn-mc {
+            image-rendering: pixelated;
+            box-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.5), inset 4px 4px 0px 0px rgba(255,255,255,0.2);
+            border: 2px solid #000;
+            transition: all 0.1s;
+        }
+        .btn-mc:active {
+            transform: translateY(4px);
+            box-shadow: inset -2px -2px 0px 0px rgba(0,0,0,0.5), inset 2px 2px 0px 0px rgba(255,255,255,0.2);
+        }
+
+        /* Tilt Effect for Cards */
+        .tilt-card {
+            transform-style: preserve-3d;
+            transform: perspective(1000px);
+        }
+        .tilt-inner {
+            transform: translateZ(20px);
+        }
+
+        /* Backgrounds */
+        .hero-bg {
+            background-color: #1a1a1a; 
+            background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.9)), url('https://images.unsplash.com/photo-1607988795691-3d0147b43231?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        /* Pixel Art Helper */
+        .pixel-art { image-rendering: pixelated; }
+        
+        #particles {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0; opacity: 0.4;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased selection:bg-mc-green selection:text-white">
+
+    <canvas id="particles"></canvas>
+
+    <!-- Navbar -->
+    <nav class="fixed w-full z-50 transition-all duration-300 top-0" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center gap-3 group cursor-pointer">
+                    <div class="w-10 h-10 bg-mc-green border-2 border-black flex items-center justify-center shadow-lg overflow-hidden group-hover:scale-110 transition-transform">
+                         <svg viewBox="0 0 8 8" class="w-full h-full pixel-art" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="8" height="8" fill="#54a329"/>
+                            <rect x="2" y="2" width="1" height="1" fill="#1a1826"/>
+                            <rect x="5" y="2" width="1" height="1" fill="#1a1826"/>
+                            <rect x="2" y="5" width="4" height="1" fill="#1a1826"/>
+                        </svg>
+                    </div>
+                    <span class="font-pixel text-3xl text-white tracking-wider text-shadow group-hover:text-mc-green transition-colors">TOGETHER</span>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="#hero" class="text-white hover:text-mc-green px-3 py-2 rounded-md font-pixel text-xl transition-colors text-shadow-sm">Главная</a>
+                        <a href="#about" class="text-gray-300 hover:text-white px-3 py-2 rounded-md font-pixel text-xl transition-colors text-shadow-sm">О Сервере</a>
+                        <a href="#lore" class="text-gray-300 hover:text-white px-3 py-2 rounded-md font-pixel text-xl transition-colors text-shadow-sm">История</a>
+                        <a href="#rules" class="text-gray-300 hover:text-mc-redstone px-3 py-2 rounded-md font-pixel text-xl transition-colors text-shadow-sm">Правила</a>
+                        
+                        <a href="https://discord.gg/FCUACWT9eh" target="_blank" class="btn-mc bg-[#5865F2] hover:bg-[#4752C4] text-white px-4 py-2 font-pixel text-xl flex items-center gap-2">
+                            <i data-lucide="message-circle" class="w-5 h-5"></i>
+                            Discord
+                        </a>
+                    </div>
+                </div>
+
+                <div class="-mr-2 flex md:hidden">
+                    <button id="mobile-menu-btn" type="button" class="inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-gray-700 focus:outline-none">
+                        <i data-lucide="menu" class="w-8 h-8"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="md:hidden hidden bg-mc-obsidian/95 backdrop-blur-md border-b-2 border-mc-green" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#hero" class="text-white block px-3 py-2 rounded-md font-pixel text-xl">Главная</a>
+                <a href="#about" class="text-gray-300 block px-3 py-2 rounded-md font-pixel text-xl">О Сервере</a>
+                <a href="#lore" class="text-gray-300 block px-3 py-2 rounded-md font-pixel text-xl">История</a>
+                <a href="#rules" class="text-gray-300 block px-3 py-2 rounded-md font-pixel text-xl">Правила</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero-bg min-h-screen flex items-center justify-center relative pt-20 overflow-hidden">
+        
+        <div class="relative z-10 text-center px-4 max-w-5xl mx-auto">
+            <div class="animate-float mb-6 inline-block hover:rotate-3 transition-transform duration-500 cursor-pointer">
+                <div class="w-32 h-32 mx-auto border-4 border-white shadow-2xl rounded-sm overflow-hidden bg-[#1a1a1a]">
+                      <svg viewBox="0 0 8 8" class="w-full h-full pixel-art" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+                        <rect width="8" height="8" fill="#E9B791"/>
+                        <rect width="8" height="2" fill="#2C1E16"/>
+                        <rect x="0" y="2" width="1" height="1" fill="#2C1E16"/>
+                        <rect x="7" y="2" width="1" height="1" fill="#2C1E16"/>
+                        <rect x="1" y="4" width="1" height="1" fill="#FFFFFF"/>
+                        <rect x="2" y="4" width="1" height="1" fill="#484898"/>
+                        <rect x="5" y="4" width="1" height="1" fill="#FFFFFF"/>
+                        <rect x="6" y="4" width="1" height="1" fill="#484898"/>
+                        <rect x="3" y="5" width="2" height="1" fill="#8F5D43"/>
+                        <rect x="3" y="6" width="2" height="1" fill="#5F3526"/>
+                        <rect x="2" y="6" width="1" height="1" fill="#7B4E36" opacity="0.5"/>
+                        <rect x="5" y="6" width="1" height="1" fill="#7B4E36" opacity="0.5"/>
+                    </svg>
+                </div>
+            </div>
+
+            <h1 class="font-pixel text-7xl md:text-9xl text-white mb-2 text-shadow-glow tracking-tighter">
+                TOGETHER
+            </h1>
+            <p class="font-pixel text-2xl md:text-4xl text-mc-green mb-8 text-shadow bg-black/30 inline-block px-4 py-1 rounded backdrop-blur-sm">
+                Vanilla Survival 1.21.10
+            </p>
+
+            <!-- Dynamic Online Status -->
+            <div class="mb-10 flex justify-center">
+                <div onclick="updateServerStatus()" class="cursor-pointer bg-black/60 backdrop-blur border border-white/20 px-6 py-2 rounded-full flex items-center gap-3 font-pixel text-xl text-gray-300 hover:bg-black/80 transition-colors">
+                    <span class="relative flex h-3 w-3">
+                      <span id="status-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                      <span id="status-dot" class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span>
+                    </span>
+                    <span id="player-count-display">Подключение...</span>
+                </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row items-center justify-center gap-6">
+                <div class="relative group w-full md:w-auto">
+                    <button onclick="copyIP()" class="w-full md:w-auto btn-mc bg-mc-green hover:bg-mc-green_dark text-white px-10 py-5 font-pixel text-3xl flex items-center justify-center gap-3 active:scale-95 transition-all">
+                        <i data-lucide="copy" class="w-6 h-6"></i>
+                        <span id="ip-text">together.play.ski</span>
+                    </button>
+                    <div id="copy-feedback" class="absolute -top-14 left-1/2 transform -translate-x-1/2 bg-black/90 text-mc-diamond px-4 py-2 rounded font-pixel text-xl border border-mc-diamond/50 opacity-0 pointer-events-none transition-all">
+                        Скопировано!
+                    </div>
+                </div>
+
+                <a href="https://discord.gg/FCUACWT9eh" target="_blank" class="w-full md:w-auto btn-mc bg-[#5865F2] hover:bg-[#4752C4] text-white px-10 py-5 font-pixel text-3xl flex items-center justify-center gap-3">
+                    <i data-lucide="users" class="w-6 h-6"></i>
+                    Discord
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-24 relative bg-[#121212]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="font-pixel text-5xl md:text-6xl text-white mb-4 text-shadow"><span class="text-mc-green">></span> О Сервере</h2>
+                <div class="w-32 h-1 bg-mc-dirt mx-auto"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="tilt-card group" onmousemove="tilt(event, this)" onmouseleave="resetTilt(this)">
+                    <div class="bg-[#1a1a1a] border border-white/10 p-8 rounded-lg h-full hover:border-mc-green/50 transition-all duration-300 shadow-lg group-hover:shadow-mc-green/20">
+                        <div class="tilt-inner">
+                            <div class="w-16 h-16 bg-mc-dirt rounded-lg flex items-center justify-center mb-6 btn-mc mx-auto group-hover:scale-110 transition-transform">
+                                <i data-lucide="pickaxe" class="w-8 h-8 text-white"></i>
+                            </div>
+                            <h3 class="font-pixel text-3xl text-white mb-3 text-center">Чистая Ванила</h3>
+                            <p class="text-gray-400 leading-relaxed text-center">
+                                Истинный Minecraft опыт 1.21.10. Без доната, влияющего на баланс. Без приватов (на доверии). Только вы и этот кубический мир.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tilt-card group" onmousemove="tilt(event, this)" onmouseleave="resetTilt(this)">
+                    <div class="bg-[#1a1a1a] border border-white/10 p-8 rounded-lg h-full hover:border-blue-500/50 transition-all duration-300 shadow-lg group-hover:shadow-blue-500/20">
+                        <div class="tilt-inner">
+                            <div class="w-16 h-16 bg-mc-stone rounded-lg flex items-center justify-center mb-6 btn-mc mx-auto group-hover:scale-110 transition-transform">
+                                <i data-lucide="users" class="w-8 h-8 text-white"></i>
+                            </div>
+                            <h3 class="font-pixel text-3xl text-white mb-3 text-center">Комьюнити</h3>
+                            <p class="text-gray-400 leading-relaxed text-center">
+                                Взрослое и адекватное сообщество. Мы строим города вместе, проводим ивенты и просто общаемся в голосовом чате.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tilt-card group" onmousemove="tilt(event, this)" onmouseleave="resetTilt(this)">
+                    <div class="bg-[#1a1a1a] border border-white/10 p-8 rounded-lg h-full hover:border-purple-500/50 transition-all duration-300 shadow-lg group-hover:shadow-purple-500/20">
+                        <div class="tilt-inner">
+                            <div class="w-16 h-16 bg-mc-obsidian rounded-lg flex items-center justify-center mb-6 btn-mc mx-auto border-purple-500 group-hover:scale-110 transition-transform">
+                                <i data-lucide="zap" class="w-8 h-8 text-purple-400"></i>
+                            </div>
+                            <h3 class="font-pixel text-3xl text-white mb-3 text-center">Технологии</h3>
+                            <p class="text-gray-400 leading-relaxed text-center">
+                                Поддержка Java и Bedrock. Мощное железо для стабильных 20 TPS даже при больших фермах. PlasmoVoice для общения в игре.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Rules Section (NEW) -->
+    <section id="rules" class="py-24 relative bg-[#0f0f0f] overflow-hidden">
+        <!-- Floating Decor Items -->
+        <div class="absolute top-10 left-10 animate-float opacity-20 pointer-events-none">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </div>
+        <div class="absolute bottom-20 right-20 animate-float-delayed opacity-20 pointer-events-none">
+             <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#4eedd8" stroke-width="1"><circle cx="12" cy="12" r="10"/></svg>
+        </div>
+
+        <div class="max-w-6xl mx-auto px-4 relative z-10">
+            <div class="flex flex-col md:flex-row gap-12 items-start">
+                
+                <div class="md:w-1/3 sticky top-24">
+                    <h2 class="font-pixel text-6xl text-white mb-6 text-shadow"><span class="text-mc-redstone">!</span> Правила</h2>
+                    <p class="text-xl text-gray-400 mb-6">
+                        Наш сервер держится на взаимоуважении. Свод правил прост, но обязателен к исполнению.
+                    </p>
+                    <a href="https://discord.gg/FCUACWT9eh" class="text-mc-green hover:text-white underline font-pixel text-xl transition-colors">
+                        Полный список в Discord &rarr;
+                    </a>
+                </div>
+
+                <div class="md:w-2/3 grid gap-6">
+                    <!-- Rule 1 -->
+                    <div class="bg-[#1a1a1a] border-l-4 border-mc-redstone p-6 rounded-r-lg hover:bg-[#252525] transition-colors group">
+                        <div class="flex items-start gap-4">
+                            <div class="bg-red-900/20 p-3 rounded text-red-500 mt-1 group-hover:scale-110 transition-transform">
+                                <i data-lucide="shield-alert" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-pixel text-2xl text-white mb-2">Гриферство Запрещено</h3>
+                                <p class="text-gray-400">Любое разрушение чужих построек, кража ресурсов или убийство животных без согласия владельца карается баном. Мы ведем логи.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rule 2 -->
+                    <div class="bg-[#1a1a1a] border-l-4 border-yellow-500 p-6 rounded-r-lg hover:bg-[#252525] transition-colors group">
+                        <div class="flex items-start gap-4">
+                            <div class="bg-yellow-900/20 p-3 rounded text-yellow-500 mt-1 group-hover:scale-110 transition-transform">
+                                <i data-lucide="cpu" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-pixel text-2xl text-white mb-2">Читы и Софт</h3>
+                                <p class="text-gray-400">Использование X-Ray, KillAura, Fly и любого другого ПО, дающего преимущество, строго запрещено. Честная игра превыше всего.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rule 3 -->
+                    <div class="bg-[#1a1a1a] border-l-4 border-blue-500 p-6 rounded-r-lg hover:bg-[#252525] transition-colors group">
+                        <div class="flex items-start gap-4">
+                            <div class="bg-blue-900/20 p-3 rounded text-blue-500 mt-1 group-hover:scale-110 transition-transform">
+                                <i data-lucide="message-square" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-pixel text-2xl text-white mb-2">Уважение в Чате</h3>
+                                <p class="text-gray-400">Запрещен спам, оскорбления, политические споры и токсичное поведение. Давайте жить дружно.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rule 4 -->
+                    <div class="bg-[#1a1a1a] border-l-4 border-mc-green p-6 rounded-r-lg hover:bg-[#252525] transition-colors group">
+                        <div class="flex items-start gap-4">
+                            <div class="bg-green-900/20 p-3 rounded text-green-500 mt-1 group-hover:scale-110 transition-transform">
+                                <i data-lucide="swords" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-pixel text-2xl text-white mb-2">PvP по Согласию</h3>
+                                <p class="text-gray-400">Убийство игроков разрешено только если обе стороны согласны на дуэль. Случайные нападения запрещены.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Lore Section -->
+    <section id="lore" class="py-24 relative overflow-hidden bg-[#121212]">
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="flex flex-col lg:flex-row items-center gap-16">
+                <div class="lg:w-1/2 tilt-card" onmousemove="tilt(event, this)" onmouseleave="resetTilt(this)">
+                    <div class="relative tilt-inner">
+                        <div class="absolute -inset-4 bg-mc-diamond/10 blur-2xl rounded-full"></div>
+                        <img src="https://images.unsplash.com/photo-1599582200501-155990264b38?q=80&w=2070&auto=format&fit=crop" 
+                             alt="Minecraft Landscape" 
+                             class="relative rounded-lg border-4 border-mc-stone shadow-2xl rotate-2 bg-[#0f0f0f]"
+                             onerror="this.style.display='none'">
+                    </div>
+                </div>
+
+                <div class="lg:w-1/2 text-left">
+                    <h2 class="font-pixel text-5xl text-white mb-6 text-shadow">История Мира</h2>
+                    <h3 class="font-sans text-xl text-mc-green font-bold mb-6 tracking-widest uppercase">Эпоха 1.21.10</h3>
+                    
+                    <div class="space-y-6 text-gray-300 text-lg leading-relaxed font-light">
+                        <p>
+                            Когда старые миры рухнули под тяжестью времени, материя начала пересобираться заново. Из хаоса цифровой пустоты возник <strong>Together</strong> — континент, не тронутый рукой человека.
+                        </p>
+                        <p>
+                            Древние легенды гласят о <span class="text-purple-400 font-bold">Бризе (The Breeze)</span>, хранителе новых подземелий, чьи залы полны сокровищ и ловушек. Те, кто осмелится пройти Испытания (Trial Chambers), обретут славу.
+                        </p>
+                        <blockquote class="border-l-4 border-mc-diamond pl-4 italic text-white/80 mt-4 bg-white/5 py-2 pr-2 rounded-r">
+                            "Мы не просто выживаем. Мы живем вместе."
+                        </blockquote>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black py-12 border-t border-white/10">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-mc-green flex items-center justify-center font-pixel text-white border border-white/20">T</div>
+                <span class="font-pixel text-xl text-white">Together Server</span>
+            </div>
+            
+            <div class="text-gray-500 text-sm">
+                &copy; 2025 Together Minecraft. Not affiliated with Mojang AB.
+            </div>
+
+            <div class="flex gap-4">
+                <a href="#" class="text-gray-500 hover:text-white transition-colors"><i data-lucide="github" class="w-5 h-5"></i></a>
+                <a href="https://discord.gg/FCUACWT9eh" class="text-gray-500 hover:text-[#5865F2] transition-colors"><i data-lucide="message-circle" class="w-5 h-5"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Icons
+        try { lucide.createIcons(); } catch (e) {}
+
+        // Navbar
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('bg-black/90', 'backdrop-blur-md', 'shadow-lg');
+            } else {
+                navbar.classList.remove('bg-black/90', 'backdrop-blur-md', 'shadow-lg');
+            }
+        });
+
+        // Mobile Menu
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+        if (btn && menu) {
+            btn.addEventListener('click', () => menu.classList.toggle('hidden'));
+        }
+
+        // --- REAL SERVER MONITORING LOGIC ---
+        // Ипользуем публичный API mcsrvstat.us
+        const MONITOR_IP = '95.217.68.89';
+        const MONITOR_PORT = '25628';
+        const DISPLAY_IP = 'together.play.ski'; // Красивый IP для показа
+
+        async function updateServerStatus() {
+            const statusText = document.getElementById('player-count-display');
+            const statusDot = document.getElementById('status-dot');
+            const statusPing = document.getElementById('status-ping');
+            
+            if(!statusText) return;
+
+            // Set loading state
+            statusText.innerText = "Обновление...";
+            statusDot.className = "relative inline-flex rounded-full h-3 w-3 bg-yellow-500";
+            statusPing.classList.add('hidden');
+
+            try {
+                // Запрос к API
+                const response = await fetch(`https://api.mcsrvstat.us/3/${MONITOR_IP}:${MONITOR_PORT}`);
+                const data = await response.json();
+
+                if (data.online) {
+                    // SERVER ONLINE
+                    statusText.innerText = `${data.players.online} / ${data.players.max} Онлайн`;
+                    
+                    // Green Dot
+                    statusDot.className = "relative inline-flex rounded-full h-3 w-3 bg-green-500";
+                    
+                    // Show Ping Animation
+                    statusPing.classList.remove('hidden');
+                    statusPing.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75";
+                    
+                    // Optional: Update Version display if needed
+                    // console.log("Server Version:", data.version);
+                } else {
+                    // SERVER OFFLINE
+                    statusText.innerText = "Сервер Оффлайн";
+                    
+                    // Red Dot
+                    statusDot.className = "relative inline-flex rounded-full h-3 w-3 bg-red-500";
+                    statusPing.classList.add('hidden');
+                }
+            } catch (error) {
+                console.error("Monitoring Error:", error);
+                statusText.innerText = "Ошибка мониторинга";
+                statusDot.className = "relative inline-flex rounded-full h-3 w-3 bg-red-500";
+                statusPing.classList.add('hidden');
+            }
+        }
+
+        // Start Monitoring
+        updateServerStatus(); // Run immediately
+        setInterval(updateServerStatus, 15000); // Update every 15 seconds (API caches for ~30s usually)
+
+        // 3D Tilt Effect
+        function tilt(event, card) {
+            const cardRect = card.getBoundingClientRect();
+            const cardCenterX = cardRect.left + cardRect.width / 2;
+            const cardCenterY = cardRect.top + cardRect.height / 2;
+            
+            const mouseX = event.clientX;
+            const mouseY = event.clientY;
+            
+            const rotateX = ((mouseY - cardCenterY) / (cardRect.height / 2)) * -10; // Max 10deg
+            const rotateY = ((mouseX - cardCenterX) / (cardRect.width / 2)) * 10;
+
+            const inner = card.querySelector('.tilt-inner');
+            if(inner) {
+                inner.style.transform = `translateZ(20px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            }
+        }
+
+        function resetTilt(card) {
+            const inner = card.querySelector('.tilt-inner');
+            if(inner) {
+                inner.style.transform = 'translateZ(0) rotateX(0) rotateY(0)';
+            }
+        }
+
+        // Copy IP
+        function copyIP() {
+            // Копируем красивый домен, хотя мониторим IP
+            const textToCopy = DISPLAY_IP; 
+            
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(textToCopy).then(showSuccess).catch(err => fallbackCopy(textToCopy));
+            } else {
+                fallbackCopy(textToCopy);
+            }
+        }
+
+        function fallbackCopy(text) {
+            let textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try { document.execCommand('copy'); showSuccess(); } catch (err) {}
+            document.body.removeChild(textArea);
+        }
+
+        function showSuccess() {
+            const feedback = document.getElementById('copy-feedback');
+            if (!feedback) return;
+            feedback.classList.remove('opacity-0', 'translate-y-2');
+            feedback.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                feedback.classList.remove('opacity-100', 'translate-y-0');
+                feedback.classList.add('opacity-0', 'translate-y-2');
+            }, 2000);
+        }
+
+        // Particles
+        const canvas = document.getElementById('particles');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            let particlesArray = [];
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 3 + 1;
+                    this.speedX = Math.random() * 0.5 - 0.25;
+                    this.speedY = Math.random() * 0.5 - 0.25;
+                    this.color = `rgba(84, 163, 41, ${Math.random() * 0.5})`; // Greenish
+                }
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    if (this.x > canvas.width) this.x = 0;
+                    if (this.x < 0) this.x = canvas.width;
+                    if (this.y > canvas.height) this.y = 0;
+                    if (this.y < 0) this.y = canvas.height;
+                }
+                draw() {
+                    ctx.fillStyle = this.color;
+                    ctx.fillRect(this.x, this.y, this.size, this.size); // Squares for pixel look
+                }
+            }
+            function init() {
+                particlesArray = [];
+                const count = (canvas.width * canvas.height) / 20000;
+                for (let i = 0; i < count; i++) particlesArray.push(new Particle());
+            }
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particlesArray.forEach(p => { p.update(); p.draw(); });
+                requestAnimationFrame(animate);
+            }
+            init();
+            animate();
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                init();
+            });
+        }
+
+        // Scroll Reveal
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('opacity-100', 'translate-y-0');
+                    entry.target.classList.remove('opacity-0', 'translate-y-10');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('section > div').forEach(el => {
+            el.classList.add('transition-all', 'duration-700', 'opacity-0', 'translate-y-10');
+            observer.observe(el);
+        });
+
+    </script>
+</body>
+</html>
